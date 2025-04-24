@@ -5,9 +5,9 @@ class ToolError(Exception):
         self.message = message
 
 
-class OpenManusError(Exception):
-    """Base exception for all OpenManus errors"""
+class HeyFunsError(Exception):
+    """Base exception for all HeyFuns errors"""
 
 
-class TokenLimitExceeded(OpenManusError):
+class TokenLimitExceeded(HeyFunsError):
     """Exception raised when the token limit is exceeded"""

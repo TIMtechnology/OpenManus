@@ -9,8 +9,8 @@ if [ $# -gt 1 ]; then
 fi
 
 VERSION=${1}
-CORE_IMAGE="iheytang/openmanus-core:${VERSION}"
-WEB_IMAGE="iheytang/openmanus-web:${VERSION}"
+CORE_IMAGE="iheytang/heyfuns-core:${VERSION}"
+WEB_IMAGE="iheytang/heyfuns-web:${VERSION}"
 ALIYUN_REGISTRY="registry.cn-hangzhou.aliyuncs.com/iheytang"
 
 # Print push information
@@ -32,8 +32,8 @@ docker push ${WEB_IMAGE}
 echo "=============================================="
 echo "Pushing to Aliyun registry..."
 echo "=============================================="
-docker push ${ALIYUN_REGISTRY}/openmanus-core:${VERSION}
-docker push ${ALIYUN_REGISTRY}/openmanus-web:${VERSION}
+docker push ${ALIYUN_REGISTRY}/heyfuns-core:${VERSION}
+docker push ${ALIYUN_REGISTRY}/heyfuns-web:${VERSION}
 
 # Check push result
 if [ $? -eq 0 ]; then
@@ -43,8 +43,8 @@ if [ $? -eq 0 ]; then
     echo "- ${CORE_IMAGE}"
     echo "- ${WEB_IMAGE}"
     echo "Aliyun registry images:"
-    echo "- ${ALIYUN_REGISTRY}/openmanus-core:${VERSION}"
-    echo "- ${ALIYUN_REGISTRY}/openmanus-web:${VERSION}"
+    echo "- ${ALIYUN_REGISTRY}/heyfuns-core:${VERSION}"
+    echo "- ${ALIYUN_REGISTRY}/heyfuns-web:${VERSION}"
     echo "Version: ${VERSION}"
     echo "=============================================="
 else

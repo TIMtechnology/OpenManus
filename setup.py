@@ -4,14 +4,14 @@ with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setup(
-    name="openmanus",
+    name="heyfuns",
     version="0.1.0",
-    author="mannaandpoem and OpenManus Team",
-    author_email="mannaandpoem@gmail.com",
+    author="iHeyTang and HeyFuns Team",
+    author_email="dehui1012@gmail.com",
     description="A versatile agent that can solve various tasks using multiple tools",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/mannaandpoem/OpenManus",
+    url="https://github.com/iHeyTang/HeyFuns",
     packages=find_packages(),
     install_requires=[
         "pydantic~=2.10.4",
@@ -42,7 +42,7 @@ setup(
     python_requires=">=3.12",
     entry_points={
         "console_scripts": [
-            "openmanus=main:main",
+            "heyfuns=main:main",
         ],
     },
 )

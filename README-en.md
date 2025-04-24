@@ -4,11 +4,9 @@
 
 [中文](README.md) | English
 
-# 🎉 iHeyTang OpenManus
+# 🎉 HeyFuns
 
-Manus is amazing, but OpenManus can realize any creative idea without an invitation code 🛫!
-
-(**Especially when it has an outstanding frontend interaction experience, it's simply fantastic!**)
+HeyFuns is an open-source AI agent development platform dedicated to providing developers with powerful and flexible AI application building tools. No invitation code required, start your AI innovation journey today 🚀!
 
 ## Project Vision
 
@@ -19,7 +17,7 @@ Manus is amazing, but OpenManus can realize any creative idea without an invitat
 
 (Yes, it has full process replay capability, allowing you to share an execution process in an almost lossless way)
 
-https://openmanus.iheytang.com/share/tasks/cm9k3hmiv00ezo8011k4008qx
+https://app.heyfuns.com/share/tasks/cm9k3hmiv00ezo8011k4008qx
 
 ## Project Features
 
@@ -34,7 +32,7 @@ https://openmanus.iheytang.com/share/tasks/cm9k3hmiv00ezo8011k4008qx
 
 The project is divided into two parts: Core (root directory) and App (web/)
 
-### OpenManus Core
+### HeyFuns Core
 
 1. Install uv (a fast Python package manager):
 
@@ -45,8 +43,8 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 2. Clone the repository:
 
 ```bash
-git clone https://github.com/iHeyTang/OpenManus.git
-cd OpenManus
+git clone https://github.com/iHeyTang/HeyFuns.git
+cd HeyFuns
 ```
 
 3. Create and activate virtual environment:
@@ -80,7 +78,7 @@ playwright install
 
 5. Install Docker environment, recommended [Docker Desktop](https://www.docker.com/products/docker-desktop/) for Windows, [Orbstack](https://orbstack.dev/download) for MacOS or Linux
 
-### OpenManus App
+### HeyFuns App
 
 1. Install `node` environment
 
@@ -126,8 +124,8 @@ npm run generate-keys
 The project uses PostgreSQL as the persistent database. You can use [Docker container](https://hub.docker.com/_/postgres) to start the database service
 
 ```bash
-# Start docker container and automatically create database named openmanus
-docker run --name openmanus-db -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=openmanus -d -p 5432:5432 postgres
+# Start docker container and automatically create database named heyfuns
+docker run --name heyfuns-db -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=heyfuns -d -p 5432:5432 postgres
 ```
 
 6. Environment variable configuration
@@ -136,7 +134,7 @@ Create `.env` file in project root directory, configure necessary environment va
 
 ```bash
 # If following step 5 database configuration, the database connection is
-DATABASE_URL="postgresql://postgres:postgres@localhost:5432/openmanus?schema=public"
+DATABASE_URL="postgresql://postgres:postgres@localhost:5432/heyfuns?schema=public"
 ```
 
 7. Generate Prisma Client & Initialize Database
@@ -152,12 +150,12 @@ npx prisma db push
 ## Quick Start
 
 ```bash
-# OpenManus Core starts with run_api.py
+# HeyFuns Core starts with run_api.py
 python run_api.py
 ```
 
 ```bash
-# OpenManus App needs to enter web/ directory, start with npm run dev
+# HeyFuns App needs to enter web/ directory, start with npm run dev
 cd web
 npm run dev
 ```

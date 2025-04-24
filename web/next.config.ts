@@ -32,7 +32,7 @@ const nextConfig = {
   async headers() {
     return [
       {
-        source: '/api/openmanus/tasks/:task_id/events',
+        source: '/api/heyfuns/tasks/:task_id/events',
         headers: [
           { key: 'Connection', value: 'keep-alive' },
           { key: 'Cache-Control', value: 'no-cache' },

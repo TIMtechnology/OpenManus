@@ -4,11 +4,9 @@
 
 中文 | [English](README-en.md)
 
-# 🎉 iHeyTang OpenManus
+# 🎉 合域方舟 HeyFuns
 
-Manus 非常棒，但 OpenManus 无需邀请码即可实现任何创意 🛫！
-
-(**特别是当他它有了非常出色的前端交互体验，简直太棒了！**)
+合域方舟（HeyFuns）是一个开源的 AI 智能体开发平台，致力于为开发者提供强大而灵活的 AI 应用构建工具。无需邀请码，即可开启您的 AI 创新之旅 🚀！
 
 ## 项目愿景
 
@@ -19,7 +17,7 @@ Manus 非常棒，但 OpenManus 无需邀请码即可实现任何创意 🛫！
 
 (没错，它拥有全流程回放能力，这使得你可以将一个的执行过程以几乎无损的方式分享)
 
-https://openmanus.iheytang.com/share/tasks/cm9k3hmiv00ezo8011k4008qx
+https://app.heyfuns.com/share/tasks/cm9k3hmiv00ezo8011k4008qx
 
 ## 项目特点
 
@@ -34,7 +32,7 @@ https://openmanus.iheytang.com/share/tasks/cm9k3hmiv00ezo8011k4008qx
 
 该项目分为两个部分，分别是 Core (根目录) 和 App (web/)
 
-### OpenManus Core
+### HeyFuns Core
 
 1. 安装 uv（一个快速的 Python 包管理器）：
 
@@ -45,8 +43,8 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 2. 克隆仓库：
 
 ```bash
-git clone https://github.com/iHeyTang/OpenManus.git
-cd OpenManus
+git clone https://github.com/iHeyTang/HeyFuns.git
+cd HeyFuns
 ```
 
 3. 创建并激活虚拟环境：
@@ -80,7 +78,7 @@ playwright install
 
 5. 安装 Docker 环境，windows 推荐 [Docker Desktop](https://www.docker.com/products/docker-desktop/)，MacOS 或 Linux 推荐 [Orbstack](https://orbstack.dev/download)
 
-### OpenManus App
+### HeyFuns App
 
 1. 安装 `node` 环境
 
@@ -126,8 +124,8 @@ npm run generate-keys
 项目使用 PostgreSQL 作为持久化数据库。可使用 [Docker 容器](https://hub.docker.com/_/postgres) 来启动数据库服务
 
 ```bash
-# 启动 docker 容器 并自动创建 名为 openmanus 的数据库
-docker run --name openmanus-db -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=openmanus -d -p 5432:5432 postgres
+# 启动 docker 容器 并自动创建 名为 heyfuns 的数据库
+docker run --name heyfuns-db -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=heyfuns -d -p 5432:5432 postgres
 ```
 
 6. 环境变量配置
@@ -136,7 +134,7 @@ docker run --name openmanus-db -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=po
 
 ```bash
 # 若按照 步骤 5 配置数据库，则数据库连接为
-DATABASE_URL="postgresql://postgres:postgres@localhost:5432/openmanus?schema=public"
+DATABASE_URL="postgresql://postgres:postgres@localhost:5432/heyfuns?schema=public"
 ```
 
 7. 生成 Prisma 客户端 & 初始化数据库
@@ -152,12 +150,12 @@ npx prisma db push
 ## 快速启动
 
 ```bash
-# OpenManus Core 使用 run_api.py 启动
+# HeyFuns Core 使用 run_api.py 启动
 python run_api.py
 ```
 
 ```bash
-# OpenManus App 需要进入 web/ 目录， 使用 npm run dev 启动
+# HeyFuns App 需要进入 web/ 目录， 使用 npm run dev 启动
 cd web
 npm run dev
 ```

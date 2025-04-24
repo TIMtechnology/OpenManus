@@ -11,8 +11,8 @@ if [ $# -gt 1 ]; then
 fi
 
 VERSION=${1}
-CORE_IMAGE="iheytang/openmanus-core:${VERSION}"
-WEB_IMAGE="iheytang/openmanus-web:${VERSION}"
+CORE_IMAGE="iheytang/heyfuns-core:${VERSION}"
+WEB_IMAGE="iheytang/heyfuns-web:${VERSION}"
 ALIYUN_REGISTRY="registry.cn-hangzhou.aliyuncs.com/iheytang"
 
 # Print build information
@@ -50,13 +50,13 @@ if [ $? -eq 0 ]; then
     echo "=============================================="
     echo "Tagging images for Aliyun registry..."
     echo "=============================================="
-    docker tag ${CORE_IMAGE} ${ALIYUN_REGISTRY}/openmanus-core:${VERSION}
-    docker tag ${WEB_IMAGE} ${ALIYUN_REGISTRY}/openmanus-web:${VERSION}
+    docker tag ${CORE_IMAGE} ${ALIYUN_REGISTRY}/heyfuns-core:${VERSION}
+    docker tag ${WEB_IMAGE} ${ALIYUN_REGISTRY}/heyfuns-web:${VERSION}
 
     echo "=============================================="
     echo "Images tagged successfully:"
-    echo "${ALIYUN_REGISTRY}/openmanus-core:${VERSION}"
-    echo "${ALIYUN_REGISTRY}/openmanus-web:${VERSION}"
+    echo "${ALIYUN_REGISTRY}/heyfuns-core:${VERSION}"
+    echo "${ALIYUN_REGISTRY}/heyfuns-web:${VERSION}"
     echo "=============================================="
 else
     echo "=============================================="

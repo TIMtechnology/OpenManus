@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'OpenManus',
-  description: 'No fortress, purely open ground. OpenManus is Coming.',
+  title: 'HeyFuns',
+  description: "Let's Imagine the Impossible, Create the Future Together",
 };
 
 export default function RootLayout({

@@ -169,7 +169,7 @@ class MCPSandboxClients(ToolCollection):
 
     # Container management
     container_name: Optional[str] = None
-    # source container name, it's OpenManus core container
+    # source container name, it's HeyFuns core container
 
     def __init__(self, client_id: str):
         super().__init__()  # Initialize with empty tools list
@@ -180,7 +180,7 @@ class MCPSandboxClients(ToolCollection):
         # Always create a new container but use cached images
         # Generate a container name with timestamp to ensure uniqueness
         timestamp = int(time.time())
-        container_name = f"openmanus-sandbox-{timestamp}-{''.join(c if c.isalnum() else '-' for c in self.client_id)}"
+        container_name = f"heyfuns-sandbox-{timestamp}-{''.join(c if c.isalnum() else '-' for c in self.client_id)}"
         self.container_name = container_name
 
     def _get_command_type(self, command: str) -> str:
@@ -240,9 +240,9 @@ class MCPSandboxClients(ToolCollection):
             docker_args.extend(
                 [
                     "-v",
-                    "openmanus-pip-cache:/root/.cache/pip",
+                    "heyfuns-pip-cache:/root/.cache/pip",
                     "-v",
-                    "openmanus-uv-cache:/root/.cache/uv",
+                    "heyfuns-uv-cache:/root/.cache/uv",
                 ]
             )
         elif command_type == "npx":
@@ -250,9 +250,9 @@ class MCPSandboxClients(ToolCollection):
             docker_args.extend(
                 [
                     "-v",
-                    "openmanus-npm-cache:/root/.npm",
+                    "heyfuns-npm-cache:/root/.npm",
                     "-v",
-                    "openmanus-yarn-cache:/usr/local/share/.cache/yarn",
+                    "heyfuns-yarn-cache:/usr/local/share/.cache/yarn",
                 ]
             )
 
@@ -279,7 +279,7 @@ class MCPSandboxClients(ToolCollection):
         if command_type == "uvx":
             docker_args.extend(
                 [
-                    "iheytang/openmanus-sandbox-uvenv:latest",
+                    "iheytang/heyfuns-sandbox-uvenv:latest",
                     "bash",
                     "-c",
                     f"{parameters.command} {' '.join(parameters.args)}",
@@ -288,7 +288,7 @@ class MCPSandboxClients(ToolCollection):
         elif command_type == "npx":
             docker_args.extend(
                 [
-                    "iheytang/openmanus-sandbox-nodejs:latest",
+                    "iheytang/heyfuns-sandbox-nodejs:latest",
                     "bash",
                     "-c",
                     f"{parameters.command} {' '.join(parameters.args)}",

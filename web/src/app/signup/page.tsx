@@ -71,7 +71,7 @@ export default function SignupPage() {
       <Card className="w-[400px] shadow-lg">
         <CardContent>
           <div className="flex justify-center">
-            <img src={logo.src} alt="HeyFuns Logo" className="h-24 w-auto" />
+            <img src={logo.src} alt="HeyFuns Logo" className="h-24 w-auto p-2 opacity-80" />
           </div>
           <div className="mb-6">
             <CardDescription className="text-center text-base">Create your HeyFuns account</CardDescription>

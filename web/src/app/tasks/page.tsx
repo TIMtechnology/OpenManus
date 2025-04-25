@@ -12,9 +12,9 @@ import { useRecentTasks } from '@/components/features/app-sidebar';
 import { ChatInput } from '@/components/features/chat/input';
 
 const EmptyState = () => (
-  <div className="flex h-full flex-col items-center justify-center opacity-50">
-    <Image src={logo} alt="HeyFuns" className="mb-4 object-contain" width={240} height={240} />
-    <div className="mb-2 text-xl font-bold">HeyFuns</div>
+  <div className="flex h-full flex-col items-center justify-center opacity-20">
+    <Image src={logo} alt="HeyFuns" className="mr-2 mb-4 object-contain" width={100} height={100} />
+    <div className="mb-2 text-xl">HeyFuns</div>
     <div className="text-sm">Let's Imagine the Impossible, Create the Future Together</div>
   </div>
 );

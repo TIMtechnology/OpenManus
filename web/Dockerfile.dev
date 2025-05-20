@@ -1,0 +1,25 @@
+FROM node:20-alpine
+
+WORKDIR /app
+
+# 复制package.json和package-lock.json
+COPY package*.json ./
+
+# 安装依赖（添加参数避免清理只读目录）
+RUN npm ci --no-audit --no-optional
+
+# 复制prisma相关文件
+COPY prisma ./prisma/
+
+# 生成Prisma客户端
+RUN npx prisma generate
+
+# 设置环境变量
+ENV NODE_ENV=development
+ENV PORT=3000
+
+# 设置工作目录已准备好，但具体的应用代码会通过volume挂载，实现热更新
+EXPOSE 3000
+
+# 使用nodemon实现热重载
+CMD ["npm", "run", "dev"]

@@ -134,7 +134,9 @@ class Manus(ReActAgent):
         self.browser_context_helper = BrowserContextHelper(self)
         self.tool_call_context_helper = ToolCallContextHelper(self)
         self.tool_call_context_helper.available_tools = ToolCollection(Terminate())
-        await self.tool_call_context_helper.mcp.initialize()
+
+        # 初始化工具上下文，包括宿主机MCP和沙箱MCP
+        await self.tool_call_context_helper.initialize()
 
         if self.tools:
             for tool in self.tools:

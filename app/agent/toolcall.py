@@ -1,5 +1,6 @@
 import asyncio
 import json
+import os
 from typing import TYPE_CHECKING, Any, List, Optional
 
 from pydantic import model_validator
@@ -12,6 +13,7 @@ from app.schema import TOOL_CHOICE_TYPE, AgentState, Message, ToolCall, ToolChoi
 from app.tool import CreateChatCompletion, Terminate, ToolCollection
 from app.tool.base import BaseTool
 from app.tool.mcp_sandbox import MCPToolCallSandboxHost
+from app.tool.host_mcp import host_mcp_tools  # 导入宿主机MCP工具
 
 # Avoid circular import if BrowserAgent needs BrowserContextHelper
 if TYPE_CHECKING:
@@ -41,6 +43,7 @@ class ToolCallContextHelper:
     )
 
     mcp: MCPToolCallSandboxHost = None
+    host_mcp_connected: bool = False  # 宿主机MCP连接状态
 
     tool_choices: TOOL_CHOICE_TYPE = ToolChoice.AUTO  # type: ignore
     special_tool_names: List[str] = [Terminate().name]
@@ -52,6 +55,7 @@ class ToolCallContextHelper:
     def __init__(self, agent: "BaseAgent"):
         self.agent = agent
         self.mcp = MCPToolCallSandboxHost(agent.task_id)
+        self._current_base64_image = None  # 初始化图像字段
 
     async def add_tool(self, tool: BaseTool) -> None:
         """Add a new tool to the available tools collection."""
@@ -76,6 +80,33 @@ class ToolCallContextHelper:
             if client:
                 for mcp_tool in client.tool_map.values():
                     self.available_tools.add_tool(mcp_tool)
+
+    async def initialize(self) -> None:
+        """初始化工具上下文，包括宿主机MCP连接"""
+        # 初始化沙箱环境
+        await self.mcp.initialize()
+
+        # 检查是否需要连接宿主机MCP
+        host_mode = os.environ.get("MCP_HOST_MODE", "false").lower() == "true"
+        if host_mode:
+            try:
+                logger.info("尝试连接宿主机MCP服务...")
+                result = await host_mcp_tools.connect()
+
+                if result:
+                    logger.info("已成功连接到宿主机MCP服务")
+                    self.host_mcp_connected = True
+
+                    # 将宿主机MCP工具添加到可用工具中
+                    for tool in host_mcp_tools.tools:
+                        logger.info(f"添加宿主机工具: {tool.name}")
+                        self.available_tools.add_tool(tool)
+                else:
+                    logger.warning("无法连接到宿主机MCP服务")
+                    self.host_mcp_connected = False
+            except Exception as e:
+                logger.error(f"连接宿主机MCP服务失败: {str(e)}")
+                self.host_mcp_connected = False
 
     async def ask_tool(self) -> bool:
         """Process current state and decide next actions using tools"""
@@ -322,21 +353,29 @@ class ToolCallContextHelper:
         return name.lower() in [n.lower() for n in self.special_tool_names]
 
     async def cleanup_tools(self):
-        """Clean up resources used by the agent's tools."""
-        for tool_name, tool_instance in self.available_tools.tool_map.items():
-            if hasattr(tool_instance, "cleanup") and asyncio.iscoroutinefunction(
-                tool_instance.cleanup
-            ):
-                try:
-                    logger.debug(f"🧼 Cleaning up tool: {tool_name}")
-                    await tool_instance.cleanup()
-                except Exception as e:
-                    logger.error(
-                        f"🚨 Error cleaning up tool '{tool_name}': {e}", exc_info=True
-                    )
+        """Clean up tool resources."""
+        logger.info("清理工具资源...")
+
+        # 清理宿主机MCP连接
+        if self.host_mcp_connected:
+            try:
+                logger.info("正在断开宿主机MCP连接...")
+                await host_mcp_tools.disconnect()
+                logger.info("已断开宿主机MCP连接")
+                self.host_mcp_connected = False
+            except Exception as e:
+                logger.error(f"断开宿主机MCP连接失败: {str(e)}")
+
+        # 清理沙箱MCP连接
         if self.mcp:
-            await self.mcp.cleanup()
-            logger.info("🧼 Cleanup complete for MCP sandbox")
+            try:
+                logger.info("正在清理MCP沙箱...")
+                await self.mcp.disconnect_all()
+                logger.info("已清理MCP沙箱")
+            except Exception as e:
+                logger.error(f"清理MCP沙箱失败: {str(e)}")
+
+        logger.info("工具资源清理完成")
 
 
 class ToolCallAgent(ReActAgent):

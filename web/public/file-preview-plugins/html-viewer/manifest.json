@@ -1,0 +1,14 @@
+{
+    "name": "html-viewer",
+    "version": "1.0.0",
+    "description": "HTML文件预览器",
+    "author": "OpenManus",
+    "fileTypes": [
+        "html",
+        "htm"
+    ],
+    "entryPoint": "index.js",
+    "styles": [
+        "style.css"
+    ]
+}

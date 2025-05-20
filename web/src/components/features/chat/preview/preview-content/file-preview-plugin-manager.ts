@@ -33,13 +33,16 @@ export class FilePreviewPluginManager {
 
   async loadPlugin(pluginPath: string): Promise<void> {
     try {
+      console.log(`正在加载插件: ${pluginPath}`);
       const manifest = await this.loadManifest(pluginPath);
       this.plugins.set(manifest.name, manifest);
+      console.log(`插件信息加载成功: ${manifest.name}, 支持的文件类型: ${manifest.fileTypes.join(', ')}`);
 
       // load plugin resources
       await this.loadPluginResources(manifest);
+      console.log(`插件资源加载完成: ${manifest.name}`);
     } catch (error) {
-      console.error(`Failed to load plugin: ${pluginPath}`, error);
+      console.error(`插件加载失败: ${pluginPath}`, error);
       throw error;
     }
   }
@@ -92,6 +95,18 @@ export class FilePreviewPluginManager {
   }
 
   getPluginForFileType(fileType: string): FilePreviewPluginManifest | undefined {
-    return Array.from(this.plugins.values()).find(plugin => plugin.fileTypes.includes(fileType));
+    // 规范化文件类型
+    const normalizedType = fileType.toLowerCase();
+
+    // 特别处理HTML文件类型
+    if (normalizedType === 'html' || normalizedType === 'htm') {
+      const htmlPlugin = Array.from(this.plugins.values()).find(
+        plugin => plugin.fileTypes.includes('html') || plugin.fileTypes.includes('htm')
+      );
+      if (htmlPlugin) return htmlPlugin;
+    }
+
+    // 常规查找
+    return Array.from(this.plugins.values()).find(plugin => plugin.fileTypes.includes(normalizedType));
   }
 }

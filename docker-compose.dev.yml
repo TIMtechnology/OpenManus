@@ -1,78 +1,50 @@
-version: "3.8"
-
-services:
-  openmanus-core-dev:
-    container_name: openmanus-core-dev
-    build:
-      context: .
-      dockerfile: Dockerfile.dev.api
-    volumes:
-      # 挂载应用代码目录，用于热更新
-      - ./app:/app/app
-      - ./config:/app/config
-      - ./run_api.py:/app/run_api.py
-      - ./requirements.txt:/app/requirements.txt
-      # 挂载工作区目录
-      - ./workspace:/workspace
-      # 挂载Docker socket，用于创建沙箱容器
-      - /var/run/docker.sock:/var/run/docker.sock
-      # 挂载脚本目录
-      - ./scripts:/app/scripts
-    environment:
-      - PYTHONUNBUFFERED=1
-      - DOCKER_HOST=unix:///var/run/docker.sock
-      - WORKSPACE_ROOT=/workspace
-      - HOST_WORKSPACE_ROOT=./workspace
-      # 开发模式标志
-      - DEVELOPMENT=true
-      # 确保日志立即刷新，不缓冲输出
-      - PYTHONFAULTHANDLER=1
-      - PYTHONASYNCIODEBUG=1
-      # 宿主机MCP配置
-      - MCP_HOST_MODE=true
-      - MCP_HOST_IP=192.168.10.7
-      - MCP_HOST_PORT=8001
-      # 日志级别
-      - LOG_LEVEL=DEBUG
-    security_opt:
-      - seccomp=unconfined
-    cap_add:
-      - SYS_ADMIN
-      - NET_ADMIN
-    # 使用tty和stdin_open确保日志正确输出到docker logs
-    tty: true
-    stdin_open: true
-    command: bash -c "python -u -m uvicorn run_api:app --host 0.0.0.0 --port 5172 --reload --log-level debug"
-    networks:
-      - openmanus-dev-network
-    ports:
-      - "5172:5172"
-      - "8765:8765"  # 为MCP WebSocket通信开放端口
-    restart: unless-stopped
-    extra_hosts:
-      - "host.docker.internal:host-gateway"  # 确保容器可以访问宿主机
-
-  # # 可选：如果需要在容器内启动Web UI
-  # openmanus-web-dev:
-  #   container_name: openmanus-web-dev
-  #   image: node:20-slim
-  #   working_dir: /app
-  #   volumes:
-  #     - ./web:/app
-  #     - ./workspace:/workspace
-  #   environment:
-  #     - MANUS_URL=http://openmanus-core-dev:5172
-  #     - PORT=3010
-  #     - WORKSPACE_ROOT_PATH=/workspace
-  #   command: sh -c "npm install && npm run dev"
-  #   depends_on:
-  #     - openmanus-core-dev
-  #   networks:
-  #     - openmanus-dev-network
-  #   ports:
-  #     - "3010:3010"
-  #   restart: unless-stopped
-
 networks:
   openmanus-dev-network:
     driver: bridge
+services:
+  openmanus-core-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev.api
+    cap_add:
+    - SYS_ADMIN
+    - NET_ADMIN
+    command: bash -c "python -u -m uvicorn run_api:app --host 0.0.0.0 --port 5172
+      --reload --log-level debug"
+    container_name: openmanus-core-dev
+    environment:
+    - PYTHONUNBUFFERED=1
+    - DOCKER_HOST=unix:///var/run/docker.sock
+    - WORKSPACE_ROOT=/workspace
+    - HOST_WORKSPACE_ROOT=./workspace
+    - DEVELOPMENT=true
+    - PYTHONFAULTHANDLER=1
+    - PYTHONASYNCIODEBUG=1
+    - MCP_HOST_MODE=true
+    - MCP_HOST_IP=192.168.10.7
+    - MCP_HOST_PORT=8001
+    - LOG_LEVEL=DEBUG
+    extra_hosts:
+    - host.docker.internal:host-gateway
+    networks:
+    - openmanus-dev-network
+    ports:
+    - 5172:5172
+    - 8765:8765
+    restart: unless-stopped
+    security_opt:
+    - seccomp=unconfined
+    stdin_open: true
+    tty: true
+    volumes:
+    - ./app:/app/app
+    - ./config:/app/config
+    - ./run_api.py:/app/run_api.py
+    - ./requirements.txt:/app/requirements.txt
+    - ./workspace:/workspace
+    - /var/run/docker.sock:/var/run/docker.sock
+    - ./docker-compose.dev.yml:/app/docker-compose.dev.yml
+    - ./Dockerfile.dev.api:/app/Dockerfile.dev.api
+    - ./scripts:/app/scripts
+    - D:\timkj\2025\OpenManus\examples\use_case:/workspace/cmagchmpl0000tjykb5timu8p/cmaw28tgj00wqtjfsmg8o0pjx
+version: '3.8'

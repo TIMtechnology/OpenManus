@@ -28,12 +28,18 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     docker.io \
     && rm -rf /var/lib/apt/lists/*
 
+# 安装 Docker Compose
+RUN curl -L "https://github.com/docker/compose/releases/download/v2.21.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose \
+    && chmod +x /usr/local/bin/docker-compose
+
 # 安装 uv
 RUN pip install --no-cache-dir uv
 
-# 检查 Docker 安装
+# 检查 Docker 和 Docker Compose 安装
 RUN which docker
 RUN docker --version
+RUN which docker-compose
+RUN docker-compose --version
 
 # 复制依赖文件
 COPY requirements.txt .
@@ -45,8 +51,8 @@ RUN uv pip install --system -r requirements.txt
 RUN uv pip install --system watchdog
 
 # 安装 Playwright 浏览器
-RUN playwright install chromium
-RUN playwright install-deps
+# RUN playwright install chromium
+# RUN playwright install-deps
 
 # 设置环境变量
 ENV PYTHONUNBUFFERED=1

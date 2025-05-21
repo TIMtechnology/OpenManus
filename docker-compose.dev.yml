@@ -9,8 +9,10 @@ services:
     cap_add:
     - SYS_ADMIN
     - NET_ADMIN
-    command: bash -c "python -u -m uvicorn run_api:app --host 0.0.0.0 --port 5172
+    command: 'bash -c "python -u -m uvicorn run_api:app --host 0.0.0.0 --port 5172
       --reload --log-level debug"
+
+      '
     container_name: openmanus-core-dev
     environment:
     - PYTHONUNBUFFERED=1
@@ -31,7 +33,6 @@ services:
     ports:
     - 5172:5172
     - 8765:8765
-    restart: unless-stopped
     security_opt:
     - seccomp=unconfined
     stdin_open: true
@@ -46,5 +47,27 @@ services:
     - ./docker-compose.dev.yml:/app/docker-compose.dev.yml
     - ./Dockerfile.dev.api:/app/Dockerfile.dev.api
     - ./scripts:/app/scripts
-    - D:\timkj\2025\OpenManus\examples\use_case:/workspace/cmagchmpl0000tjykb5timu8p/cmaw28tgj00wqtjfsmg8o0pjx
-version: '3.8'
+  openmanus-monitor:
+    build:
+      context: .
+      dockerfile: Dockerfile.monitor
+    container_name: openmanus-monitor
+    depends_on:
+    - openmanus-core-dev
+    environment:
+    - PYTHONUNBUFFERED=1
+    - DEBUG_MODE=1
+    extra_hosts:
+    - host.docker.internal:host-gateway
+    networks:
+    - openmanus-dev-network
+    ports:
+    - 8089:8089
+    restart: unless-stopped
+    volumes:
+    - ./workspace:/workspace
+    - ./docker-compose.dev.yml:/app/docker-compose.dev.yml
+    - ./monitor:/app/monitor
+    - /var/run/docker.sock:/var/run/docker.sock
+    - ./Dockerfile.dev.api:/app/Dockerfile.dev.api
+    - ./requirements.txt:/app/requirements.txt

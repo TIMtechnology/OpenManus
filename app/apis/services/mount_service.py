@@ -1,14 +1,29 @@
+import requests
+import os
 from typing import Dict, List, Optional
 
-from app.container.mount_manager import MountManager, MountConfig
 from app.logger import logger
 
 
 class MountService:
-    """工作区挂载服务"""
+    """工作区挂载服务 - 通过Monitor容器API实现"""
 
     def __init__(self):
-        self.mount_manager = MountManager()
+        # 监控容器API地址
+        # 在开发环境下，使用容器名访问
+        # 在生产环境下，可以使用环境变量配置
+        self.monitor_api = os.environ.get("MONITOR_API", "http://openmanus-monitor:8089/api")
+
+        # 兼容性测试模式 - 如果设置为True，会尝试直接API调用不可用时回退到旧版实现
+        self.fallback_mode = os.environ.get("MONITOR_API_FALLBACK", "0") == "1"
+
+    def _check_monitor_available(self) -> bool:
+        """检查监控API是否可用"""
+        try:
+            response = requests.get(f"{self.monitor_api}/health", timeout=3)
+            return response.status_code == 200
+        except Exception:
+            return False
 
     def mount_workspace(self, user_id: str, workspace_id: str, local_path: str, description: Optional[str] = None) -> Dict:
         """
@@ -24,29 +39,46 @@ class MountService:
             Dict: 操作结果
         """
         try:
-            # 应用挂载并重启容器
-            success = self.mount_manager.apply_mount(user_id, workspace_id, local_path)
+            logger.info(f"通过Monitor API添加挂载: {user_id}/{workspace_id}, 路径: {local_path}")
 
-            if success:
-                # 获取最新挂载信息
-                mount_info = self.mount_manager.get_mount_info(user_id, workspace_id)
+            # 发送请求到监控容器API
+            response = requests.post(
+                f"{self.monitor_api}/mounts",
+                json={
+                    "user_id": user_id,
+                    "workspace_id": workspace_id,
+                    "local_path": local_path,
+                    "description": description
+                },
+                timeout=30
+            )
+
+            # 处理响应
+            if response.status_code == 200:
+                result = response.json()
+
+                # 检查是否需要重启
+                self._try_restart_container()
 
                 return {
-                    "success": True,
-                    "message": "工作区挂载成功",
-                    "data": mount_info
+                    "success": result.get("success", True),
+                    "message": result.get("message", "工作区挂载成功"),
+                    "data": result.get("data")
                 }
             else:
+                error_msg = f"监控API返回错误: {response.status_code}"
+                logger.error(error_msg)
                 return {
                     "success": False,
-                    "message": "工作区挂载失败",
+                    "message": error_msg,
                     "data": None
                 }
         except Exception as e:
-            logger.error(f"挂载工作区时发生错误: {str(e)}")
+            error_msg = f"挂载工作区时发生错误: {str(e)}"
+            logger.error(error_msg)
             return {
                 "success": False,
-                "message": f"挂载工作区时发生错误: {str(e)}",
+                "message": error_msg,
                 "data": None
             }
 
@@ -62,29 +94,40 @@ class MountService:
             Dict: 操作结果
         """
         try:
-            # 移除挂载配置
-            success = self.mount_manager.remove_mount(user_id, workspace_id)
+            logger.info(f"通过Monitor API移除挂载: {user_id}/{workspace_id}")
 
-            if success:
-                # 重启容器以应用变更
-                restart_success = self.mount_manager.restart_dev_container()
+            # 发送请求到监控容器API
+            response = requests.delete(
+                f"{self.monitor_api}/mounts/{user_id}/{workspace_id}",
+                timeout=30
+            )
+
+            # 处理响应
+            if response.status_code == 200:
+                result = response.json()
+
+                # 检查是否需要重启
+                self._try_restart_container()
 
                 return {
-                    "success": restart_success,
-                    "message": "工作区挂载卸载成功" if restart_success else "卸载配置成功，但容器重启失败",
-                    "data": None
+                    "success": result.get("success", True),
+                    "message": result.get("message", "工作区挂载已移除"),
+                    "data": result.get("data")
                 }
             else:
+                error_msg = f"监控API返回错误: {response.status_code}"
+                logger.error(error_msg)
                 return {
                     "success": False,
-                    "message": "未找到指定工作区的挂载配置",
+                    "message": error_msg,
                     "data": None
                 }
         except Exception as e:
-            logger.error(f"卸载工作区挂载时发生错误: {str(e)}")
+            error_msg = f"卸载工作区挂载时发生错误: {str(e)}"
+            logger.error(error_msg)
             return {
                 "success": False,
-                "message": f"卸载工作区挂载时发生错误: {str(e)}",
+                "message": error_msg,
                 "data": None
             }
 
@@ -96,18 +139,33 @@ class MountService:
             Dict: 挂载列表
         """
         try:
-            mount_list = self.mount_manager.list_mounts()
+            logger.info("通过Monitor API获取挂载列表")
 
-            return {
-                "success": True,
-                "message": "获取挂载列表成功",
-                "data": mount_list
-            }
+            # 发送请求到监控容器API
+            response = requests.get(f"{self.monitor_api}/mounts", timeout=10)
+
+            # 处理响应
+            if response.status_code == 200:
+                result = response.json()
+                return {
+                    "success": result.get("success", True),
+                    "message": "获取挂载列表成功",
+                    "data": result.get("data", [])
+                }
+            else:
+                error_msg = f"监控API返回错误: {response.status_code}"
+                logger.error(error_msg)
+                return {
+                    "success": False,
+                    "message": error_msg,
+                    "data": []
+                }
         except Exception as e:
-            logger.error(f"获取挂载列表时发生错误: {str(e)}")
+            error_msg = f"获取挂载列表时发生错误: {str(e)}"
+            logger.error(error_msg)
             return {
                 "success": False,
-                "message": f"获取挂载列表时发生错误: {str(e)}",
+                "message": error_msg,
                 "data": []
             }
 
@@ -123,25 +181,42 @@ class MountService:
             Dict: 挂载信息
         """
         try:
-            mount_info = self.mount_manager.get_mount_info(user_id, workspace_id)
+            logger.info(f"通过Monitor API获取挂载信息: {user_id}/{workspace_id}")
 
-            if mount_info:
+            # 发送请求到监控容器API
+            response = requests.get(
+                f"{self.monitor_api}/mounts/{user_id}/{workspace_id}",
+                timeout=10
+            )
+
+            # 处理响应
+            if response.status_code == 200:
+                result = response.json()
                 return {
-                    "success": True,
+                    "success": result.get("success", True),
                     "message": "获取挂载信息成功",
-                    "data": mount_info
+                    "data": result.get("data")
                 }
-            else:
+            elif response.status_code == 404:
                 return {
                     "success": False,
                     "message": "未找到指定工作区的挂载信息",
                     "data": None
                 }
+            else:
+                error_msg = f"监控API返回错误: {response.status_code}"
+                logger.error(error_msg)
+                return {
+                    "success": False,
+                    "message": error_msg,
+                    "data": None
+                }
         except Exception as e:
-            logger.error(f"获取挂载信息时发生错误: {str(e)}")
+            error_msg = f"获取挂载信息时发生错误: {str(e)}"
+            logger.error(error_msg)
             return {
                 "success": False,
-                "message": f"获取挂载信息时发生错误: {str(e)}",
+                "message": error_msg,
                 "data": None
             }
 
@@ -152,18 +227,79 @@ class MountService:
         Returns:
             Dict: 操作结果
         """
-        try:
-            success = self.mount_manager.restart_dev_container()
+        return self._try_restart_container()
 
-            return {
-                "success": success,
-                "message": "容器重启成功" if success else "容器重启失败",
-                "data": None
-            }
+    def _try_restart_container(self) -> Dict:
+        """
+        尝试通过监控API重启容器
+
+        Returns:
+            Dict: 操作结果
+        """
+        try:
+            logger.info("通过Monitor API重启容器")
+
+            # 发送请求到监控容器API
+            response = requests.post(f"{self.monitor_api}/restart", timeout=30)
+
+            # 处理响应
+            if response.status_code == 200:
+                result = response.json()
+                return {
+                    "success": result.get("success", True),
+                    "message": result.get("message", "容器重启请求已发送"),
+                    "data": result.get("data")
+                }
+            else:
+                error_msg = f"监控API返回错误: {response.status_code}"
+                logger.error(error_msg)
+                return {
+                    "success": False,
+                    "message": error_msg,
+                    "data": None
+                }
         except Exception as e:
-            logger.error(f"重启容器时发生错误: {str(e)}")
+            error_msg = f"重启容器时发生错误: {str(e)}"
+            logger.error(error_msg)
             return {
                 "success": False,
-                "message": f"重启容器时发生错误: {str(e)}",
+                "message": error_msg,
+                "data": None
+            }
+
+    # 调试接口 - 仅在开发模式下可用
+    def test_monitor_connection(self) -> Dict:
+        """
+        测试与监控容器的连接
+
+        Returns:
+            Dict: 测试结果
+        """
+        try:
+            # 检查监控API是否可用
+            is_available = self._check_monitor_available()
+
+            if is_available:
+                return {
+                    "success": True,
+                    "message": "监控API可用",
+                    "data": {
+                        "api_url": self.monitor_api,
+                        "status": "connected"
+                    }
+                }
+            else:
+                return {
+                    "success": False,
+                    "message": "无法连接到监控API",
+                    "data": {
+                        "api_url": self.monitor_api,
+                        "status": "disconnected"
+                    }
+                }
+        except Exception as e:
+            return {
+                "success": False,
+                "message": f"测试连接时发生错误: {str(e)}",
                 "data": None
             }

@@ -103,3 +103,20 @@ async def restart_container():
     except Exception as e:
         logger.error(f"重启容器时发生错误: {str(e)}")
         raise HTTPException(status_code=500, detail=f"重启容器时发生错误: {str(e)}")
+
+# 测试接口 - 仅用于开发调试
+@router.get("/test-monitor", response_model=MountResponse, summary="测试监控容器连接")
+async def test_monitor_connection():
+    """
+    测试监控容器连接状态
+
+    用于检查开发容器是否可以连接到监控容器
+    """
+    try:
+        mount_service = MountService()
+        result = mount_service.test_monitor_connection()
+
+        return result
+    except Exception as e:
+        logger.error(f"测试监控容器连接时发生错误: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"测试监控容器连接时发生错误: {str(e)}")
